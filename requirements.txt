@@ -1,0 +1,2 @@
+# No external packages needed — api/news.py uses Python stdlib only
+# Vercel requires this file to recognize the Python runtime

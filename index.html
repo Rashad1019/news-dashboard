@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MultiAgent News Analyst</title>
+  <meta name="description" content="A multi-agent AI pipeline that fetches, filters, and summarizes daily news on any topic you choose." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <canvas id="bg-canvas"></canvas>
+
+  <div class="app">
+
+    <!-- ── Header ── -->
+    <header class="header">
+      <div class="header-inner">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="16" r="14" stroke="url(#hg1)" stroke-width="1.5"/>
+              <path d="M10 16 L16 8 L22 16 L16 24 Z" fill="url(#hg2)" opacity="0.9"/>
+              <circle cx="16" cy="16" r="2.5" fill="#f4efe6"/>
+              <defs>
+                <linearGradient id="hg1" x1="0" y1="0" x2="32" y2="32">
+                  <stop offset="0%" stop-color="#2a52a0"/><stop offset="100%" stop-color="#c9a96e"/>
+                </linearGradient>
+                <linearGradient id="hg2" x1="0" y1="0" x2="32" y2="32">
+                  <stop offset="0%" stop-color="#3a6cc0"/><stop offset="100%" stop-color="#d4b87a"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div>
+            <span class="logo-title">MultiAgent News</span>
+            <span class="logo-sub">Autonomous · Personalized · Live</span>
+          </div>
+        </div>
+        <div class="header-badge">
+          <span class="pulse-dot"></span>
+          <span>3 Agents Ready</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+
+      <!-- ── STEP 1: Topic Selection ── -->
+      <section class="section" id="section-topics">
+
+        <div class="section-eyebrow">
+          <span class="step-badge">Step 1</span>
+          Choose Your Topics
+        </div>
+        <h1 class="section-title">What do you want news on today?</h1>
+        <p class="section-desc">Pick from the presets below, add your own custom topics, or do both. Agent A will fetch live headlines for everything you select.</p>
+
+        <!-- Preset topic chips -->
+        <div class="preset-grid">
+          <div class="preset-group-label">Popular Topics</div>
+          <div class="chip-grid" id="chip-grid">
+            <!-- Chips injected by JS -->
+          </div>
+        </div>
+
+        <!-- Custom topic input -->
+        <div class="custom-topic-wrap">
+          <div class="custom-topic-label">+ Add a custom topic</div>
+          <div class="custom-input-row">
+            <input
+              type="text"
+              id="custom-topic-input"
+              class="custom-input"
+              placeholder="e.g. Quantum Computing, SpaceX, React 19…"
+              maxlength="60"
+            />
+            <button id="btn-add-topic" class="btn btn-outline">Add</button>
+          </div>
+        </div>
+
+        <!-- Selected topics display -->
+        <div class="selected-wrap" id="selected-wrap" style="display:none;">
+          <div class="selected-label">Selected topics:</div>
+          <div class="selected-chips" id="selected-chips"></div>
+        </div>
+
+        <!-- Run button -->
+        <button id="btn-run" class="btn btn-primary btn-run" disabled>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Run Agent Pipeline
+        </button>
+
+      </section>
+
+      <!-- ── PIPELINE ── -->
+      <section class="pipeline" id="pipeline">
+        <div class="pipeline-track">
+
+          <div class="agent-card" id="agent-a" data-state="idle">
+            <div class="agent-header">
+              <div class="agent-avatar avatar-a">A</div>
+              <div class="agent-info">
+                <div class="agent-name">Agent A <span class="agent-name-sub">· Headline Scanner</span></div>
+                <div class="agent-status-text" id="agent-a-status">Waiting…</div>
+              </div>
+              <div class="status-ring-wrap"><div class="status-ring" id="ring-a"></div></div>
+            </div>
+            <div class="agent-body">
+              <div class="agent-task">Fetches live headlines from Google News RSS feeds for your selected topics, deduplicates, and catalogues every result with auto-generated topic tags.</div>
+              <div class="agent-metrics">
+                <div class="metric"><span class="metric-val" id="m-a-fetched">–</span><span class="metric-lbl">fetched</span></div>
+                <div class="metric"><span class="metric-val" id="m-a-parsed">–</span><span class="metric-lbl">parsed</span></div>
+                <div class="metric"><span class="metric-val" id="m-a-time">–</span><span class="metric-lbl">ms</span></div>
+              </div>
+            </div>
+            <div class="agent-prog-bar"><div class="agent-prog-fill" id="prog-a"></div></div>
+          </div>
+
+          <div class="pipe-arrow" id="arrow-ab">
+            <div class="pipe-line"></div>
+            <svg class="pipe-head" viewBox="0 0 12 12"><path d="M0 6L10 6M6 2L10 6L6 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+            <span class="pipe-label">Catalogue</span>
+          </div>
+
+          <div class="agent-card" id="agent-b" data-state="idle">
+            <div class="agent-header">
+              <div class="agent-avatar avatar-b">B</div>
+              <div class="agent-info">
+                <div class="agent-name">Agent B <span class="agent-name-sub">· Relevance Ranker</span></div>
+                <div class="agent-status-text" id="agent-b-status">Waiting…</div>
+              </div>
+              <div class="status-ring-wrap"><div class="status-ring" id="ring-b"></div></div>
+            </div>
+            <div class="agent-body">
+              <div class="agent-task">Scores every headline for relevance to your chosen topics using keyword matching and context analysis. Selects the top 3 highest-scoring results.</div>
+              <div class="agent-metrics">
+                <div class="metric"><span class="metric-val" id="m-b-scored">–</span><span class="metric-lbl">scored</span></div>
+                <div class="metric"><span class="metric-val" id="m-b-selected">–</span><span class="metric-lbl">selected</span></div>
+                <div class="metric"><span class="metric-val" id="m-b-time">–</span><span class="metric-lbl">ms</span></div>
+              </div>
+            </div>
+            <div class="agent-prog-bar"><div class="agent-prog-fill" id="prog-b"></div></div>
+          </div>
+
+          <div class="pipe-arrow" id="arrow-bc">
+            <div class="pipe-line"></div>
+            <svg class="pipe-head" viewBox="0 0 12 12"><path d="M0 6L10 6M6 2L10 6L6 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+            <span class="pipe-label">Top 3</span>
+          </div>
+
+          <div class="agent-card" id="agent-c" data-state="idle">
+            <div class="agent-header">
+              <div class="agent-avatar avatar-c">C</div>
+              <div class="agent-info">
+                <div class="agent-name">Agent C <span class="agent-name-sub">· Summary Writer</span></div>
+                <div class="agent-status-text" id="agent-c-status">Waiting…</div>
+              </div>
+              <div class="status-ring-wrap"><div class="status-ring" id="ring-c"></div></div>
+            </div>
+            <div class="agent-body">
+              <div class="agent-task">Drafts a rich, contextual one-paragraph summary for each of the three selected headlines, tailored to your specific topic interests.</div>
+              <div class="agent-metrics">
+                <div class="metric"><span class="metric-val" id="m-c-drafted">–</span><span class="metric-lbl">drafted</span></div>
+                <div class="metric"><span class="metric-val" id="m-c-words">–</span><span class="metric-lbl">words</span></div>
+                <div class="metric"><span class="metric-val" id="m-c-time">–</span><span class="metric-lbl">ms</span></div>
+              </div>
+            </div>
+            <div class="agent-prog-bar"><div class="agent-prog-fill" id="prog-c"></div></div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── RESULTS ── -->
+      <section class="section results-section" id="results-section" style="display:none;">
+        <div class="section-eyebrow">
+          <span class="step-badge">Output</span>
+          Agent Pipeline Results
+        </div>
+        <h2 class="section-title" id="results-title">Top 3 Headlines</h2>
+        <p class="section-desc" id="results-desc">Agent B selected the most relevant headlines. Agent C wrote the summaries below.</p>
+
+        <div class="results-grid" id="results-grid"></div>
+
+        <details class="raw-details">
+          <summary class="raw-summary">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            View full Agent A catalogue (all headlines scored)
+          </summary>
+          <div class="raw-table-wrap">
+            <table class="raw-table">
+              <thead><tr><th>#</th><th>Headline</th><th>Tags</th><th>Score</th></tr></thead>
+              <tbody id="raw-tbody"></tbody>
+            </table>
+          </div>
+        </details>
+
+        <div class="results-footer">
+          <button id="btn-reset" class="btn btn-outline">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+            Change Topics & Run Again
+          </button>
+          <button id="btn-copy" class="btn btn-primary-sm">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy Summaries
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <span>MultiAgent News Analyst · Antigravity IDE · m15-multiagent</span>
+      <span id="footer-time"></span>
+    </footer>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="agents.js"></script>
+</body>
+</html>
